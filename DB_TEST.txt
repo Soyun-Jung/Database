@@ -1,0 +1,47 @@
+--1.EMP 테이블에서 사원번호, 사원이름, 월급을 출력하시오.
+SELECT EMPNO, ENAME, SAL FROM EMP;
+
+--2. EMP테이블에서 사원이름과 월급 출력하는데 컬럼명은 이름, 월급으로 바꿔서 출력하시오.
+SELECT ENAME AS 이름, SAL AS 월급 FROM EMP;
+
+--3. EMP 테이블에서 사원번호, 사원이름, 월급, 연봉을 구하고 각각 컬럼명은 사원번호, 사원이름, 월급, 연봉으로 출력하시오.
+SELECT EMPNO AS 사원번호, ENAME AS 사원이름, SAL AS 월급, SAL*12 AS 연봉 FROM EMP;
+
+--4. EMP 테이블의 업무(JOB)를 중복되지 않게 표시하시오(GROUP BY)
+SELECT JOB FROM EMP GROUP BY JOB;
+
+--5. EMP 테이블에서 SAL*12를 사용하여 사원이름과 연봉을 출력
+SELECT ENAME AS 사원이름, SAL*12 AS 연봉 FROM EMP;
+
+--6. 이름이 J,A또는 M으로 시작하는 모든 사원의 이름과 이름의 길이를 표시하시오.
+SELECT ENAME, LENGTH(ENAME)
+FROM EMP
+WHERE ENAME LIKE 'J%' OR ENAME LIKE 'M%' OR ENAME LIKE 'A%';
+
+SELECT * FROM EMP;
+SELECT * FROM DEPT;
+--7. 수당(COMM)을 받고 급여가 1600이상인 사원의 사원이름, 부서명, 근무지를 출력하시오.
+SELECT EMP.ENAME AS 사원이름, dept.dname AS 부서명, DEPT.LOC AS 근무지
+FROM EMP INNER JOIN DEPT ON EMP.DEPTNO = DEPT.DEPTNO
+WHERE EMP.COMM IS NOT NULL AND EMP.SAL>=1600;
+
+--8. 근무지별로 근무하는 사원의 수가 5명 이하인 경우, 인원이 적은 도시 순으로 정렬하시오.
+
+SELECT DEPT.LOC, COUNT(EMP.ENAME)
+FROM EMP INNER JOIN DEPT ON EMP.DEPTNO = DEPT.DEPTNO
+GROUP BY DEPT.LOC
+ORDER BY COUNT(EMP.ENAME);
+
+--9. 총급여(SAL+COMM)가 평균 급여보다 많은 급여를 받는 사람의 부서번호, 이름, 총급여, 수당을 추력하시오,(수당은 유,무로표시 컬럼명은 COMM유무로 출력)
+SELECT DEPTNO AS 부서번호, ENAME AS 이름, (NVL(COMM,0)+SAL) AS 총급여, NVL2(COMM,'유','무') AS 수당
+FROM EMP
+WHERE (NVL(COMM,0)+SAL) > (SELECT AVG((NVL(COMM,0)+SAL))
+FROM EMP);
+
+--10. 20번 부서에서 가장 급여를 많이 받는 사원과 동일한 급여를 받는 사원의 이름과 부서명, 급여, 급여등급을 출력하시오.(EMP, DEPT, SALGRADE 테이블 사용)
+SELECT EMP.ENAME AS 사원이름, DEPT.DNAME AS 부서명, EMP.SAL AS 급여, (SELECT GRADE FROM SALGRADE WHERE LOSAL <= (SELECT EMP.SAL AS SAL FROM EMP INNER JOIN DEPT ON EMP.DEPTNO = DEPT.DEPTNO
+                                                                                                               WHERE EMP.SAL = (SELECT MAX(SAL) FROM EMP WHERE DEPTNO=20))
+                                                                                                    AND HISAL >= (SELECT EMP.SAL AS SAL FROM EMP INNER JOIN DEPT ON EMP.DEPTNO = DEPT.DEPTNO
+                                                                                                                WHERE EMP.SAL = (SELECT MAX(SAL) FROM EMP WHERE DEPTNO=20))) AS 급여등급 
+FROM EMP INNER JOIN DEPT ON EMP.DEPTNO = DEPT.DEPTNO
+WHERE EMP.SAL = (SELECT MAX(SAL) FROM EMP WHERE DEPTNO=20); 
